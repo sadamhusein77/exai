@@ -1,1 +1,2 @@
-export { Home } from './Home';
+export { ProductsPage } from './Products';
+export { CMSPage } from './CMS';

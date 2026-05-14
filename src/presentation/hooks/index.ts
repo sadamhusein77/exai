@@ -2,52 +2,32 @@
 // Connect presentation to domain layer use cases
 
 import { useState, useEffect, useCallback } from 'react';
-import type { User, Project, Skill, Experience, ContactFormData } from '../../domain/entities';
-import type { SkillCategory } from '../../domain/entities';
-import {
-  GetUserProfileUseCase,
-  GetAllProjectsUseCase,
-  GetFeaturedProjectsUseCase,
-  GetAllSkillsUseCase,
-  GetSkillsByCategoryUseCase,
-  GetAllExperiencesUseCase,
-  SendContactMessageUseCase,
-} from '../../domain/usecases';
-import {
-  UserRepository,
-  ProjectRepository,
-  SkillRepository,
-  ExperienceRepository,
-  ContactRepository,
-} from '../../data/repositories';
+import type { Product, PromotionContent, Language } from '../../domain/entities';
+import { GetAllProductsUseCase, GetProductByIdUseCase, SaveProductUseCase, DeleteProductUseCase, GeneratePromotionUseCase } from '../../domain/usecases';
+import { ProductRepository } from '../../data/repositories';
+import { v4 as uuidv4 } from 'uuid';
 
-// Initialize repositories
-const userRepo = new UserRepository();
-const projectRepo = new ProjectRepository();
-const skillRepo = new SkillRepository();
-const experienceRepo = new ExperienceRepository();
-const contactRepo = new ContactRepository();
+// Initialize repository
+const productRepo = new ProductRepository();
 
 // Initialize use cases
-const getUserProfileUseCase = new GetUserProfileUseCase(userRepo);
-const getAllProjectsUseCase = new GetAllProjectsUseCase(projectRepo);
-const getFeaturedProjectsUseCase = new GetFeaturedProjectsUseCase(projectRepo);
-const getAllSkillsUseCase = new GetAllSkillsUseCase(skillRepo);
-const getSkillsByCategoryUseCase = new GetSkillsByCategoryUseCase(skillRepo);
-const getAllExperiencesUseCase = new GetAllExperiencesUseCase(experienceRepo);
-const sendContactMessageUseCase = new SendContactMessageUseCase(contactRepo);
+const getAllProductsUseCase = new GetAllProductsUseCase(productRepo);
+const getProductByIdUseCase = new GetProductByIdUseCase(productRepo);
+const saveProductUseCase = new SaveProductUseCase(productRepo);
+const deleteProductUseCase = new DeleteProductUseCase(productRepo);
+const generatePromotionUseCase = new GeneratePromotionUseCase(productRepo);
 
-// User Hook
-export function useUserProfile() {
-  const [user, setUser] = useState<User | null>(null);
+// Products Hook
+export function useProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchUser = useCallback(async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await getUserProfileUseCase.execute();
-      setUser(data);
+      const data = await getAllProductsUseCase.execute();
+      setProducts(data);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -55,169 +35,109 @@ export function useUserProfile() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  const createProduct = useCallback(async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+    const product: Product = {
+      ...productData,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+    };
+    const saved = await saveProductUseCase.execute(product);
+    setProducts(prev => [...prev, saved]);
+    return saved;
+  }, []);
 
-  return { user, isLoading, error, refetch: fetchUser };
+  const updateProduct = useCallback(async (product: Product) => {
+    const updated = await saveProductUseCase.execute(product);
+    setProducts(prev => prev.map(p => p.id === product.id ? updated : p));
+    return updated;
+  }, []);
+
+  const deleteProduct = useCallback(async (id: string) => {
+    const success = await deleteProductUseCase.execute(id);
+    if (success) {
+      setProducts(prev => prev.filter(p => p.id !== id));
+    }
+    return success;
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  return { products, isLoading, error, refetch: fetchProducts, createProduct, updateProduct, deleteProduct };
 }
 
-// Projects Hooks
-export function useProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+// Single Product Hook
+export function useProduct(id: string) {
+  const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchProjects = useCallback(async () => {
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getProductByIdUseCase.execute(id);
+        setProduct(data);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetch();
+  }, [id]);
+
+  return { product, isLoading, error };
+}
+
+// AI Generation Hook
+export function useAIGeneration() {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [result, setResult] = useState<PromotionContent | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const generate = useCallback(async (productId: string, language: Language) => {
     try {
-      setIsLoading(true);
-      const data = await getAllProjectsUseCase.execute();
-      setProjects(data);
+      setIsGenerating(true);
+      setError(null);
+      const content = await generatePromotionUseCase.execute(productId, language);
+      setResult(content);
+      return content;
     } catch (err) {
       setError(err as Error);
+      throw err;
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
-  return { projects, isLoading, error, refetch: fetchProjects };
-}
-
-export function useFeaturedProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetch = async () => {
-      setIsLoading(true);
-      const data = await getFeaturedProjectsUseCase.execute();
-      setProjects(data);
-      setIsLoading(false);
-    };
-    fetch();
+  const clearResult = useCallback(() => {
+    setResult(null);
+    setError(null);
   }, []);
 
-  return { projects, isLoading };
+  return { generate, isGenerating, result, error, clearResult };
 }
 
-// Skills Hooks
-export function useSkills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchSkills = useCallback(async () => {
-    setIsLoading(true);
-    const data = await getAllSkillsUseCase.execute();
-    setSkills(data);
-    setIsLoading(false);
-  }, []);
+// Settings Hook (API Key management)
+export function useSettings() {
+  const [apiKey, setApiKeyState] = useState<string>('');
 
   useEffect(() => {
-    fetchSkills();
-  }, [fetchSkills]);
-
-  return { skills, isLoading, refetch: fetchSkills };
-}
-
-export function useSkillsByCategory(category: SkillCategory) {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetch = async () => {
-      setIsLoading(true);
-      const data = await getSkillsByCategoryUseCase.execute(category);
-      setSkills(data);
-      setIsLoading(false);
-    };
-    fetch();
-  }, [category]);
-
-  return { skills, isLoading };
-}
-
-// Experience Hook
-export function useExperiences() {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchExperiences = useCallback(async () => {
-    setIsLoading(true);
-    const data = await getAllExperiencesUseCase.execute();
-    setExperiences(data);
-    setIsLoading(false);
+    // Load from .env first, then check localStorage for user override
+    const envKey = import.meta.env.VITE_OPENROUTER_API_KEY as string || '';
+    const storedKey = localStorage.getItem('openrouter_api_key') || localStorage.getItem('openai_api_key') || '';
+    // localStorage takes precedence if user has set a custom key
+    setApiKeyState(storedKey || envKey);
   }, []);
 
-  useEffect(() => {
-    fetchExperiences();
-  }, [fetchExperiences]);
-
-  return { experiences, isLoading, refetch: fetchExperiences };
-}
-
-// Contact Hook
-export function useContact() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<{ success: boolean; message: string } | null>(null);
-
-  const sendMessage = useCallback(async (data: ContactFormData) => {
-    setIsLoading(true);
-    try {
-      const result = await sendContactMessageUseCase.execute(data);
-      setResponse(result);
-      return result;
-    } finally {
-      setIsLoading(false);
-    }
+  const setApiKey = useCallback((key: string) => {
+    localStorage.setItem('openrouter_api_key', key);
+    setApiKeyState(key);
   }, []);
 
-  return { sendMessage, isLoading, response };
-}
+  const hasApiKey = apiKey.length > 0;
 
-// Theme Hook
-export function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('theme') as 'light' | 'dark' | null;
-      if (stored) return stored;
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  });
-
-  // Apply theme and save to localStorage whenever theme changes
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  }, []);
-
-  return { theme, toggleTheme };
-}
-
-// Scroll Position Hook
-export function useScrollPosition() {
-  const [scrollPosition, setScrollPosition] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollPosition(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return scrollPosition;
+  return { apiKey, setApiKey, hasApiKey };
 }
