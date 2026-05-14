@@ -42,7 +42,7 @@ export function deleteProduct(id: string): boolean {
   const filtered = products.filter(p => p.id !== id);
 
   if (filtered.length === products.length) {
-    return false; // No deletion occurred
+    return false;
   }
 
   saveProducts(filtered);

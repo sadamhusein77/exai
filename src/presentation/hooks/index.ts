@@ -2,7 +2,7 @@
 // Connect presentation to domain layer use cases
 
 import { useState, useEffect, useCallback } from 'react';
-import type { Product, PromotionContent, Language } from '../../domain/entities';
+import type { Product, PromotionContent, Language, Tone } from '../../domain/entities';
 import { GetAllProductsUseCase, GetProductByIdUseCase, SaveProductUseCase, DeleteProductUseCase, GeneratePromotionUseCase } from '../../domain/usecases';
 import { ProductRepository } from '../../data/repositories';
 import { v4 as uuidv4 } from 'uuid';
@@ -97,11 +97,11 @@ export function useAIGeneration() {
   const [result, setResult] = useState<PromotionContent | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const generate = useCallback(async (productId: string, language: Language) => {
+  const generate = useCallback(async (productId: string, language: Language, tone: Tone) => {
     try {
       setIsGenerating(true);
       setError(null);
-      const content = await generatePromotionUseCase.execute(productId, language);
+      const content = await generatePromotionUseCase.execute(productId, language, tone);
       setResult(content);
       return content;
     } catch (err) {
