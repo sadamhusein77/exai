@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
+      '@': path.resolve(__dirname, './src'),
       '@src/presentation/components': path.resolve(__dirname, './src/presentation/components'),
       '@src/shared': path.resolve(__dirname, './src/shared'),
       '@src/domain': path.resolve(__dirname, './src/domain'),

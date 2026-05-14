@@ -27,6 +27,7 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@src/presentation/components/*": ["./src/presentation/components/*"],
       "@src/shared/*": ["./src/shared/*"],
       "@src/domain/*": ["./src/domain/*"],
