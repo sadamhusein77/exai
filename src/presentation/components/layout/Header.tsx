@@ -1,116 +1,52 @@
-import { useState } from 'react';
+// Presentation Layer - Header Component
+// Navigation header with CMS and Products links
+
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon } from 'lucide-react';
-import { useTheme, useScrollPosition } from '../../hooks';
-import { Button } from '../ui/Button';
+import { Package, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button'
 
-const navLinks = [
-  { path: '/', label: 'Home' },
-];
+interface HeaderProps {
+  onSettingsClick: () => void;
+}
 
-export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-  const scrollPosition = useScrollPosition();
+export function Header({ onSettingsClick }: HeaderProps) {
   const location = useLocation();
 
-  const isScrolled = scrollPosition > 50;
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header
-      className={`
-        fixed top-0 left-0 right-0 h-[72px] z-50 transition-all duration-250
-        ${isScrolled ? 'bg-white dark:bg-slate-900 shadow-md' : 'bg-transparent'}
-      `}
-    >
-      <div className="px-6 h-full flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-blue-600">
-          irello
-        </Link>
-
-        <nav className="hidden md:flex gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`
-                text-sm font-medium relative py-1
-                ${location.pathname === link.path
-                  ? 'text-blue-600'
-                  : 'text-slate-700 dark:text-slate-200'
-                }
-              `}
-            >
-              {link.label}
-              <span
-                className={`
-                  absolute bottom-0 left-0 h-0.5 bg-blue-600 transition-all duration-150
-                  ${location.pathname === link.path ? 'w-full' : 'w-0'}
-                `}
-              />
-            </Link>
-          ))}
-        </nav>
-
+    <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={toggleTheme}>
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(true)}
-          >
-            <Menu size={24} />
-          </Button>
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">AI</span>
+          </div>
+          <span className="font-semibold text-slate-800 dark:text-white">Export Generator</span>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="fixed top-0 right-0 w-full max-w-[320px] h-screen bg-white dark:bg-slate-900 shadow-xl z-[200] p-6"
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
-          >
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-xl font-bold text-blue-600">irello</span>
-              <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(false)}>
-                <X size={24} />
-              </Button>
-            </div>
-            <nav className="flex flex-col gap-4">
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.path}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Link
-                    to={link.path}
-                    className={`
-                      block text-lg font-medium p-3 rounded-md transition-all duration-150
-                      ${location.pathname === link.path
-                        ? 'bg-slate-100 dark:bg-slate-800 text-blue-600'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }
-                    `}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <nav className="flex items-center gap-4">
+          <Link to="/">
+            <Button
+              variant={isActive('/') ? 'default' : 'ghost'}
+              size="sm"
+            >
+              <Package size={18} className="mr-2" />
+              Products
+            </Button>
+          </Link>
+          <Link to="/cms">
+            <Button
+              variant={isActive('/cms') ? 'default' : 'ghost'}
+              size="sm"
+            >
+              CMS
+            </Button>
+          </Link>
+          <Button variant="ghost" size="sm" onClick={onSettingsClick}>
+            <Settings size={18} />
+          </Button>
+        </nav>
+      </div>
     </header>
   );
 }
