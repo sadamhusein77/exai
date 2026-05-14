@@ -1,70 +1,31 @@
-// Data Layer - Repository Implementations
-// Concrete implementations of domain repository contracts
+// Data Layer - Product Repository Implementation
+// Concrete implementation of product repository using localStorage
 
-import type { IUserRepository, IProjectRepository, ISkillRepository, IExperienceRepository, IContactRepository } from '../../domain/repositories';
-import type { User, Project, Skill, Experience, ContactFormData, ContactResponse, SkillCategory } from '../../domain/entities';
-import { mockUser, mockProjects, mockSkills, mockExperiences } from '../datasources/local';
+import type { IProductRepository } from '../../domain/repositories';
+import type { Product } from '../../domain/entities';
+import { getProducts, saveProduct, deleteProduct, getProductById } from '../datasources/local';
 
-// Simulate async operations
+// Simulate async operations for consistency with other repositories
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export class UserRepository implements IUserRepository {
-  async getProfile(): Promise<User> {
-    await delay(100);
-    return mockUser;
+export class ProductRepository implements IProductRepository {
+  async getAll(): Promise<Product[]> {
+    await delay(50);
+    return getProducts();
   }
 
-  async updateProfile(data: Partial<User>): Promise<User> {
-    await delay(100);
-    return { ...mockUser, ...data };
-  }
-}
-
-export class ProjectRepository implements IProjectRepository {
-  async getAllProjects(): Promise<Project[]> {
-    await delay(100);
-    return mockProjects;
+  async getById(id: string): Promise<Product | null> {
+    await delay(50);
+    return getProductById(id);
   }
 
-  async getProjectById(id: string): Promise<Project | null> {
-    await delay(100);
-    return mockProjects.find(p => p.id === id) || null;
+  async save(product: Product): Promise<Product> {
+    await delay(50);
+    return saveProduct(product);
   }
 
-  async getFeaturedProjects(): Promise<Project[]> {
-    await delay(100);
-    return mockProjects.filter(p => p.featured);
-  }
-}
-
-export class SkillRepository implements ISkillRepository {
-  async getAllSkills(): Promise<Skill[]> {
-    await delay(100);
-    return mockSkills;
-  }
-
-  async getSkillsByCategory(category: SkillCategory): Promise<Skill[]> {
-    await delay(100);
-    return mockSkills.filter(s => s.category === category);
-  }
-}
-
-export class ExperienceRepository implements IExperienceRepository {
-  async getAllExperiences(): Promise<Experience[]> {
-    await delay(100);
-    return mockExperiences;
-  }
-
-  async getCurrentRole(): Promise<Experience | null> {
-    await delay(100);
-    return mockExperiences.find(e => e.isCurrentRole) || null;
-  }
-}
-
-export class ContactRepository implements IContactRepository {
-  async sendMessage(data: ContactFormData): Promise<ContactResponse> {
-    await delay(1500); // Simulate API call
-    console.log('Contact form submitted:', data);
-    return { success: true, message: 'Message sent successfully!' };
+  async delete(id: string): Promise<boolean> {
+    await delay(50);
+    return deleteProduct(id);
   }
 }
