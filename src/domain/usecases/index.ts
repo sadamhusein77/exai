@@ -120,6 +120,16 @@ export class GeneratePromotionUseCase {
       arabic: 'Arabic',
       japanese: 'Japanese',
       french: 'French',
+      german: 'German',
+      portuguese: 'Portuguese',
+      chinese: 'Chinese',
+      korean: 'Korean',
+      italian: 'Italian',
+      russian: 'Russian',
+      hindi: 'Hindi',
+      thai: 'Thai',
+      vietnamese: 'Vietnamese',
+      turkish: 'Turkish',
     };
 
     const toneLabels: Record<Tone, string> = {
@@ -132,13 +142,12 @@ export class GeneratePromotionUseCase {
     const productData = JSON.stringify(product, null, 2);
 
     return `Generate high-conversion export marketing content following AIDA structure.
+IMPORTANT: You MUST generate ALL output content EXCLUSIVELY in ${languageLabels[language]}. The title, attention, interest, desire bullets, and action must ALL be in ${languageLabels[language]}. Do NOT mix languages.
 
 You must use ALL provided structured data - do not ignore any field.
 
 Product Data:
 ${productData}
-
-Language: ${languageLabels[language]}
 
 Tone: ${toneLabels[tone]}
 

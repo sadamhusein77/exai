@@ -15,6 +15,7 @@ interface BasicInfoStepProps {
     origin_country: string;
     material: string[];
     features: string[];
+    image_url?: string;
   };
   onUpdate: (data: Partial<BasicInfoStepProps['data']>) => void;
   onNext: () => void;
@@ -90,6 +91,17 @@ export function BasicInfoStep({ data, onUpdate, onNext }: BasicInfoStepProps) {
           onChange={(e) => onUpdate({ origin_country: e.target.value })}
           placeholder="e.g. Indonesia"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="image">Image URL (optional)</Label>
+        <Input
+          id="image"
+          type="url"
+          value={data.image_url || ''}
+          onChange={(e) => onUpdate({ image_url: e.target.value })}
+          placeholder="https://example.com/product-image.jpg"
         />
       </div>
 

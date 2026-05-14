@@ -8,6 +8,7 @@ export interface ProductBasic {
   origin_country: string;
   material: string[];
   features: string[];
+  image_url?: string;
 }
 
 export interface ProductMarketing {
@@ -39,7 +40,6 @@ export interface Product {
   marketing: ProductMarketing;
   exporter: ProductExporter;
   context: ProductContext;
-  image?: string;
   createdAt: string;
 }
 
@@ -52,7 +52,7 @@ export interface PromotionContent {
   action: string;
 }
 
-export type Language = 'english' | 'indonesian' | 'spanish' | 'arabic' | 'japanese' | 'french';
+export type Language = 'english' | 'indonesian' | 'spanish' | 'arabic' | 'japanese' | 'french' | 'german' | 'portuguese' | 'chinese' | 'korean' | 'italian' | 'russian' | 'hindi' | 'thai' | 'vietnamese' | 'turkish';
 
 export const SUPPORTED_LANGUAGES: { value: Language; label: string }[] = [
   { value: 'english', label: 'English' },
@@ -61,6 +61,16 @@ export const SUPPORTED_LANGUAGES: { value: Language; label: string }[] = [
   { value: 'arabic', label: 'Arabic' },
   { value: 'japanese', label: 'Japanese' },
   { value: 'french', label: 'French' },
+  { value: 'german', label: 'German' },
+  { value: 'portuguese', label: 'Portuguese' },
+  { value: 'chinese', label: 'Chinese' },
+  { value: 'korean', label: 'Korean' },
+  { value: 'italian', label: 'Italian' },
+  { value: 'russian', label: 'Russian' },
+  { value: 'hindi', label: 'Hindi' },
+  { value: 'thai', label: 'Thai' },
+  { value: 'vietnamese', label: 'Vietnamese' },
+  { value: 'turkish', label: 'Turkish' },
 ];
 
 export type Tone = 'professional' | 'luxury' | 'marketplace' | 'technical';
@@ -82,6 +92,7 @@ export function createEmptyProduct(): Omit<Product, 'id' | 'createdAt'> {
       origin_country: '',
       material: [],
       features: [],
+      image_url: '',
     },
     marketing: {
       usp: '',

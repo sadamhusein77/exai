@@ -15,9 +15,9 @@ export function ProductCard({ product, onGenerateClick }: ProductCardProps) {
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
       {/* Image */}
       <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-        {product.image ? (
+        {product.basic.image_url ? (
           <img
-            src={product.image}
+            src={product.basic.image_url}
             alt={product.basic.product_name}
             className="w-full h-full object-cover"
             onError={(e) => {

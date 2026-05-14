@@ -185,9 +185,9 @@ export function CMSPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {product.image ? (
+                          {product.basic.image_url ? (
                             <img
-                              src={product.image}
+                              src={product.basic.image_url}
                               alt={product.basic.product_name}
                               className="w-full h-full object-cover"
                               onError={(e) => {

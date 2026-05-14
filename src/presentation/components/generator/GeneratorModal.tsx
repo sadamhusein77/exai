@@ -56,7 +56,7 @@ export function GeneratorModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px] max-h-[95dvh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -64,7 +64,7 @@ export function GeneratorModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 flex-1 min-h-0 overflow-y-auto">
           {/* Product Info */}
           <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
             <p className="font-medium text-slate-800 dark:text-white">{product.basic.product_name}</p>
@@ -172,7 +172,12 @@ export function GeneratorModal({
                   Regenerate
                 </Button>
               </div>
-              <PromotionOutput content={result} />
+              <PromotionOutput
+                content={result}
+                productName={product.basic.product_name}
+                language={SUPPORTED_LANGUAGES.find(l => l.value === selectedLanguage)?.label}
+                tone={SUPPORTED_TONES.find(t => t.value === selectedTone)?.label}
+              />
             </div>
           )}
         </div>
