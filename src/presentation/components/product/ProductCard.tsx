@@ -18,7 +18,7 @@ export function ProductCard({ product, onGenerateClick }: ProductCardProps) {
         {product.image ? (
           <img
             src={product.image}
-            alt={product.name}
+            alt={product.basic.product_name}
             className="w-full h-full object-cover"
             onError={(e) => {
               (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2"%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3C/svg%3E';
@@ -34,21 +34,21 @@ export function ProductCard({ product, onGenerateClick }: ProductCardProps) {
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
             <h3 className="font-semibold text-slate-800 dark:text-white line-clamp-1">
-              {product.name}
+              {product.basic.product_name}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {product.origin} • {product.material}
+              {product.basic.origin_country} • {product.basic.category}
             </p>
           </div>
         </div>
 
         <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-4">
-          {product.description}
+          {product.basic.description}
         </p>
 
         {/* Features */}
         <div className="flex flex-wrap gap-1 mb-4">
-          {product.features.slice(0, 3).map((feature, index) => (
+          {product.basic.features.slice(0, 3).map((feature: string, index: number) => (
             <span
               key={index}
               className="px-2 py-0.5 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full"
@@ -56,9 +56,9 @@ export function ProductCard({ product, onGenerateClick }: ProductCardProps) {
               {feature}
             </span>
           ))}
-          {product.features.length > 3 && (
+          {product.basic.features.length > 3 && (
             <span className="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full">
-              +{product.features.length - 3}
+              +{product.basic.features.length - 3}
             </span>
           )}
         </div>
