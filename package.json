@@ -1,5 +1,5 @@
 {
-  "name": "floflow",
+  "name": "expai",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -23,6 +23,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.474.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
