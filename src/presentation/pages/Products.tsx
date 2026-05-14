@@ -2,29 +2,19 @@
 // Displays all products with Generate Promotion functionality
 
 import { useState } from 'react';
-import { Package, Plus } from 'lucide-react';
+import { Package } from 'lucide-react';
 import type { Product } from '../../domain/entities';
 import { useProducts, useAIGeneration, useSettings } from '../hooks';
 import { ProductCard } from '../components/product/ProductCard';
-import { ProductForm } from '../components/product/ProductForm';
 import { GeneratorModal } from '../components/generator/GeneratorModal';
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 
 export function ProductsPage() {
-  const { products, isLoading, createProduct } = useProducts();
+  const { products, isLoading } = useProducts();
   const { generate, isGenerating, result, error, clearResult } = useAIGeneration();
   const { hasApiKey } = useSettings();
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleGenerateClick = (product: Product) => {
     setSelectedProduct(product);
@@ -38,16 +28,6 @@ export function ProductsPage() {
     clearResult();
   };
 
-  const handleCreateProduct = async (data: Omit<Product, 'id' | 'createdAt'>) => {
-    setIsSubmitting(true);
-    try {
-      await createProduct(data);
-      setIsCreateModalOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="min-h-[calc(100vh-72px)] py-8">
       <div className="max-w-6xl mx-auto px-6">
@@ -58,13 +38,9 @@ export function ProductsPage() {
               Products
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Select a product to generate promotional content
+              Select a product to generate AIDA marketing content
             </p>
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            <Plus size={18} className="mr-2" />
-            Add Product
-          </Button>
         </div>
 
         {/* Loading */}
@@ -89,12 +65,8 @@ export function ProductsPage() {
               No products yet
             </h2>
             <p className="text-slate-500 dark:text-slate-400 mb-6">
-              Add your first product to start generating promotions
+              Go to CMS page to create your first product
             </p>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
-              <Plus size={18} className="mr-2" />
-              Add Product
-            </Button>
           </div>
         )}
 
@@ -111,20 +83,6 @@ export function ProductsPage() {
           </div>
         )}
       </div>
-
-      {/* Create Product Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={(open) => !open && setIsCreateModalOpen(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
-          </DialogHeader>
-          <ProductForm
-            onSubmit={handleCreateProduct}
-            onCancel={() => setIsCreateModalOpen(false)}
-            isSubmitting={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
 
       {/* Generator Modal */}
       {selectedProduct && (

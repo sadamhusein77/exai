@@ -1,11 +1,15 @@
 // CMS Page
-// Manage products: create, edit, delete
+// Multi-step wizard for creating export products
 
 import { useState } from 'react';
-import { Package, Trash2, Edit2, Plus } from 'lucide-react';
+import { Package, Trash2, Edit2, Plus, Check } from 'lucide-react';
 import type { Product } from '../../domain/entities';
+import { createEmptyProduct } from '../../domain/entities';
 import { useProducts } from '../hooks';
-import { ProductForm } from '../components/product/ProductForm';
+import { BasicInfoStep } from '../components/cms/BasicInfoStep';
+import { MarketingStep } from '../components/cms/MarketingStep';
+import { ExporterStep } from '../components/cms/ExporterStep';
+import { ContextStep } from '../components/cms/ContextStep';
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,39 +19,80 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 
+const STEPS = [
+  { id: 1, title: 'Basic Info', description: 'Product details' },
+  { id: 2, title: 'Marketing', description: 'USP & targeting' },
+  { id: 3, title: 'Exporter', description: 'Company profile' },
+  { id: 4, title: 'Context', description: 'Sales context' },
+];
+
 export function CMSPage() {
   const { products, isLoading, createProduct, updateProduct, deleteProduct } = useProducts();
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [wizardData, setWizardData] = useState(createEmptyProduct());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreateProduct = async (data: Omit<Product, 'id' | 'createdAt'>) => {
-    setIsSubmitting(true);
-    try {
-      await createProduct(data);
-      setIsCreateModalOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleUpdateProduct = async (data: Omit<Product, 'id' | 'createdAt'>) => {
-    if (!editingProduct) return;
-    setIsSubmitting(true);
-    try {
-      await updateProduct({ ...editingProduct, ...data });
+  const openWizard = (product?: Product) => {
+    if (product) {
+      setEditingProduct(product);
+      setWizardData(product);
+    } else {
       setEditingProduct(null);
+      setWizardData(createEmptyProduct());
+    }
+    setCurrentStep(1);
+    setIsWizardOpen(true);
+  };
+
+  const closeWizard = () => {
+    setIsWizardOpen(false);
+    setCurrentStep(1);
+    setEditingProduct(null);
+    setWizardData(createEmptyProduct());
+  };
+
+  const handleCreateProduct = async () => {
+    setIsSubmitting(true);
+    try {
+      if (editingProduct) {
+        await updateProduct({ ...editingProduct, ...wizardData });
+      } else {
+        await createProduct(wizardData);
+      }
+      closeWizard();
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const isWizardSubmitting = isSubmitting;
 
   const handleDeleteProduct = async () => {
     if (!deletingProduct) return;
     await deleteProduct(deletingProduct.id);
     setDeletingProduct(null);
+  };
+
+  const updateWizardData = (updates: { basic?: Partial<typeof wizardData.basic>; marketing?: Partial<typeof wizardData.marketing>; exporter?: Partial<typeof wizardData.exporter>; context?: Partial<typeof wizardData.context> }) => {
+    setWizardData(prev => {
+      if ('basic' in updates && updates.basic) {
+        return { ...prev, basic: { ...prev.basic, ...updates.basic } };
+      }
+      if ('marketing' in updates && updates.marketing) {
+        return { ...prev, marketing: { ...prev.marketing, ...updates.marketing } };
+      }
+      if ('exporter' in updates && updates.exporter) {
+        return { ...prev, exporter: { ...prev.exporter, ...updates.exporter } };
+      }
+      if ('context' in updates && updates.context) {
+        return { ...prev, context: { ...prev.context, ...updates.context } };
+      }
+      return prev;
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -68,10 +113,10 @@ export function CMSPage() {
               Product Management
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Create and manage your export products
+              Create structured product data for AI-powered marketing
             </p>
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
+          <Button onClick={() => openWizard()}>
             <Plus size={18} className="mr-2" />
             Add Product
           </Button>
@@ -99,9 +144,9 @@ export function CMSPage() {
               No products yet
             </h2>
             <p className="text-slate-500 dark:text-slate-400 mb-6">
-              Create your first product to get started
+              Create your first product to start generating promotions
             </p>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Button onClick={() => openWizard()}>
               <Plus size={18} className="mr-2" />
               Add Product
             </Button>
@@ -118,10 +163,13 @@ export function CMSPage() {
                     Product
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                    Origin / Material
+                    Category / Origin
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                    Features
+                    USP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    Target Market
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                     Created
@@ -140,7 +188,7 @@ export function CMSPage() {
                           {product.image ? (
                             <img
                               src={product.image}
-                              alt={product.name}
+                              alt={product.basic.product_name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
@@ -152,33 +200,23 @@ export function CMSPage() {
                         </div>
                         <div>
                           <p className="font-medium text-slate-800 dark:text-white">
-                            {product.name}
+                            {product.basic.product_name}
                           </p>
                           <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
-                            {product.description}
+                            {product.basic.description}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                      {product.origin} / {product.material}
+                      {product.basic.category}<br />
+                      <span className="text-slate-400">{product.basic.origin_country}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {product.features.slice(0, 2).map((f, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full"
-                          >
-                            {f}
-                          </span>
-                        ))}
-                        {product.features.length > 2 && (
-                          <span className="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full">
-                            +{product.features.length - 2}
-                          </span>
-                        )}
-                      </div>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                      <span className="line-clamp-2">{product.marketing.usp || '-'}</span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 capitalize">
+                      {product.marketing.target_market || '-'}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                       {formatDate(product.createdAt)}
@@ -188,7 +226,7 @@ export function CMSPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setEditingProduct(product)}
+                          onClick={() => openWizard(product)}
                         >
                           <Edit2 size={16} />
                         </Button>
@@ -210,34 +248,81 @@ export function CMSPage() {
         )}
       </div>
 
-      {/* Create Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={(open) => !open && setIsCreateModalOpen(false)}>
-        <DialogContent>
+      {/* Wizard Dialog */}
+      <Dialog open={isWizardOpen} onOpenChange={(open) => !open && closeWizard()}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
+            <DialogTitle>
+              {editingProduct ? 'Edit Product' : 'Create New Product'}
+            </DialogTitle>
           </DialogHeader>
-          <ProductForm
-            onSubmit={handleCreateProduct}
-            onCancel={() => setIsCreateModalOpen(false)}
-            isSubmitting={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
 
-      {/* Edit Modal */}
-      <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-          </DialogHeader>
-          {editingProduct && (
-            <ProductForm
-              product={editingProduct}
-              onSubmit={handleUpdateProduct}
-              onCancel={() => setEditingProduct(null)}
-              isSubmitting={isSubmitting}
-            />
-          )}
+          {/* Progress Steps */}
+          <div className="flex items-center justify-between mb-6 px-2">
+            {STEPS.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                      currentStep > step.id
+                        ? 'bg-green-500 text-white'
+                        : currentStep === step.id
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                    }`}
+                  >
+                    {currentStep > step.id ? <Check size={16} /> : step.id}
+                  </div>
+                  <span className="text-xs mt-1 text-slate-500 dark:text-slate-400 hidden sm:block">
+                    {step.title}
+                  </span>
+                </div>
+                {index < STEPS.length - 1 && (
+                  <div
+                    className={`w-8 sm:w-16 h-0.5 mx-1 ${
+                      currentStep > step.id ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Step Content */}
+          <div className="min-h-[300px]">
+            {currentStep === 1 && (
+              <BasicInfoStep
+                data={wizardData.basic}
+                onUpdate={(data) => updateWizardData({ basic: data })}
+                onNext={() => setCurrentStep(2)}
+              />
+            )}
+            {currentStep === 2 && (
+              <MarketingStep
+                data={wizardData.marketing}
+                onUpdate={(data) => updateWizardData({ marketing: data })}
+                onNext={() => setCurrentStep(3)}
+                onBack={() => setCurrentStep(1)}
+              />
+            )}
+            {currentStep === 3 && (
+              <ExporterStep
+                data={wizardData.exporter}
+                onUpdate={(data) => updateWizardData({ exporter: data })}
+                onNext={() => setCurrentStep(4)}
+                onBack={() => setCurrentStep(2)}
+              />
+            )}
+            {currentStep === 4 && (
+              <ContextStep
+                data={wizardData.context}
+                onUpdate={(data) => updateWizardData({ context: data })}
+                onSubmit={handleCreateProduct}
+                onBack={() => setCurrentStep(3)}
+                isSubmitting={isWizardSubmitting}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -250,7 +335,7 @@ export function CMSPage() {
           {deletingProduct && (
             <div className="py-4">
               <p className="text-slate-600 dark:text-slate-300">
-                Are you sure you want to delete <strong>{deletingProduct.name}</strong>?
+                Are you sure you want to delete <strong>{deletingProduct.basic.product_name}</strong>?
                 This action cannot be undone.
               </p>
             </div>
@@ -259,10 +344,7 @@ export function CMSPage() {
             <Button variant="ghost" onClick={() => setDeletingProduct(null)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteProduct}
-            >
+            <Button variant="destructive" onClick={handleDeleteProduct}>
               Delete
             </Button>
           </DialogFooter>
