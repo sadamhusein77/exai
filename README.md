@@ -1,4 +1,4 @@
-# ExpAI - Export Promotion Generator
+# ExpAI - Export Promotion Generator 
 
 An AI-powered web application that helps exporters and B2B businesses create high-conversion marketing content for their products using the AIDA (Attention-Interest-Desire-Action) framework.
 
