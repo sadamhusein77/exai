@@ -68,7 +68,9 @@ export class GeneratePromotionUseCase {
       throw new Error('Product not found');
     }
 
-    const apiKey = localStorage.getItem('openrouter_api_key') || localStorage.getItem('openai_api_key');
+    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY as string
+      || localStorage.getItem('openrouter_api_key')
+      || localStorage.getItem('openai_api_key');
 
     if (!apiKey) {
       throw new Error('API key not configured. Please add your API key in Settings.');
