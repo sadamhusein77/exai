@@ -1,73 +1,110 @@
-# React + TypeScript + Vite
+# ExpAI - Export Promotion Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An AI-powered web application that helps exporters and B2B businesses create high-conversion marketing content for their products using the AIDA (Attention-Interest-Desire-Action) framework.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Product Management (CMS)** - Multi-step wizard for creating structured product data
+- **AI Promotion Generation** - Generate professional export marketing content powered by AI
+- **16 Languages** - English, Indonesian, Spanish, Arabic, Japanese, French, German, Portuguese, Chinese, Korean, Italian, Russian, Hindi, Thai, Vietnamese, Turkish
+- **4 Tones** - Professional, Luxury Export, Marketplace Casual, Technical B2B
+- **PDF Export** - Download generated promotions as formatted PDF documents
+- **Product Catalog** - View all products with quick promotion generation
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 19.2.4 + TypeScript
+- **Build Tool**: Vite 8.0.1
+- **Routing**: React Router DOM 7.1.1
+- **Styling**: Tailwind CSS 4.3.0 (with dark mode)
+- **UI Components**: Radix UI
+- **Animations**: Framer Motion
+- **PDF Generation**: jsPDF
+- **AI Integration**: OpenRouter API (Llama 3 8B)
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+ and npm
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+### Production Build
+
+```bash
+npm run build
+npm run preview
+```
+
+### Other Commands
+
+```bash
+npm run lint        # ESLint
+npm run type-check  # TypeScript check
+```
+
+## Configuration
+
+### API Key Setup
+
+ExpAI uses OpenRouter API for AI content generation. You have two options:
+
+1. **Environment Variable** (recommended for production):
+   ```bash
+   VITE_OPENROUTER_API_KEY=your_api_key_here
+   ```
+
+2. **In-App Settings**:
+   - Click the Settings icon in the header
+   - Enter your OpenRouter API key
+   - Get your free API key at: https://openrouter.ai/keys
+
+## Project Structure
+
+```
+src/
+├── App.tsx                    # Main app with routing
+├── main.tsx                   # Entry point
+├── shared/
+│   └── globals.css           # Tailwind + custom CSS
+├── components/
+│   └── ui/                   # Reusable UI primitives
+├── domain/                   # Business logic layer
+│   ├── entities/            # Product, PromotionContent types
+│   ├── repositories/        # Repository interfaces
+│   └── usecases/            # Business use cases
+├── data/                     # Data access layer
+│   ├── datasources/         # localStorage operations
+│   └── repositories/         # Repository implementations
+└── presentation/            # UI layer
+    ├── pages/               # Products, CMS pages
+    ├── components/          # Feature components
+    └── hooks/               # Custom React hooks
+```
+
+## Architecture
+
+Clean architecture with three layers:
+
+- **Domain Layer**: Business entities and use cases (pure TypeScript)
+- **Data Layer**: Repository implementations and localStorage persistence
+- **Presentation Layer**: React components, pages, and hooks
+
+## Deployment
+
+Configured for Vercel deployment. Output directory: `dist/`
+
+## License
+
+MIT
